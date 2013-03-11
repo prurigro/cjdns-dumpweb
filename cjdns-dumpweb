@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#Dump Web: A script that uses cjdcmd (https://github.com/inhies/cjdcmd) to dump any websites running on port 80 from the collection of addresses in your routing table
+#Version: 1.0
+#License: MIT
+#Issues/ideas: http://gitboria.com/prurigro/cjdns-onlinepeers or prurigro@darkcloud.ca
+
+for address in $(cjdcmd dump | \grep -o fc[^\ ]*); do
+    DUMP=$(wget -T 1 -t 1 -6 -qO- http://[$address])
+    if [ ! -z "$DUMP" ]; then
+        echo "${address}:"
+        echo $DUMP
+    fi
+done
