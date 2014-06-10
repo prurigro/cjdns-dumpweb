@@ -1,14 +1,30 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-#Dump Web: A script that uses cjdcmd (https://github.com/inhies/cjdcmd) to dump any websites running on port 80 from the collection of addresses in your routing table
-#Version: 1.0
-#License: MIT
-#Issues/ideas: http://gitboria.com/prurigro/cjdns-onlinepeers or prurigro@darkcloud.ca
+#############################################################
+#                                                           #
+# cjdns-dumpweb | release: 2                                #
+#                                                           #
+# The behaviour of this script is simple: It uses `cjdcmd`  #
+# to access the `cjdroute` admin port and dump the current  #
+# routing table, parsing for ipv6 addresses, then iterates  #
+# through each address and tests port 80, which it dumps to #
+# stdout when it receives a reply. Simple parsers, robots   #
+# etc. can use this to facilitate pulling data from         #
+# Hyperboria.                                               #
+#                                                           #
+# Requirements: cjdcmd (https://github.com/inhies/cjdcmd)   #
+#               bash and wget                               #
+#                                                           #
+# Credits: Kevin MacMartin (https://github.com/prurigro)    #
+# License: MIT                                              #
+#                                                           #
+#############################################################
+
+# Exit with an error if cjdcmd or wget can't be found
+[[ ! `type -P cjdcmd` ]] && echo 'Error: cjdcmd is not in $PATH' && exit 1
+[[ ! `type -P wget` ]] && echo 'Error: wget is not in $PATH' && exit 1
 
 for address in $(cjdcmd dump | \grep -o fc[^\ ]*); do
-    DUMP=$(wget -T 1 -t 1 -6 -qO- http://[$address])
-    if [ ! -z "$DUMP" ]; then
-        echo "${address}:"
-        echo $DUMP
-    fi
+    DUMP="$(wget -T 1 -t 1 -6 -qO- http://[$address])"
+    [[ -n "$DUMP" ]] && echo -e "### DUMP OF http://[${address}] BEGIN ###\n${DUMP}\n### DUMP OF http://[${address}] END ###\n"
 done
